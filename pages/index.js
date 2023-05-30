@@ -8,51 +8,47 @@ export default function Home() {
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [commits, setCommits] = useState([]);
+  const [org, setOrg] = useState('netflix');
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    //this will fetch data in a loop until it returns an empty array
-    const fetchData = async () => {
-      let page = 1;
-      let fetchedRepos = [];
-      while (true) {
-        try {
-          const result = await axios.get(
-            'https://api.github.com/search/repositories', {
-              params: {
-                q: 'user:netflix',
-                sort: 'stars',
-                order: 'desc',
-                page: page,
-              },
-            }
-          );
-
-          //here is what will exit the loop
-          if (result.data.items.length === 0) {
-            break;
+  const fetchRepos = async (org) => {
+    setLoading(true);
+    let page = 1;
+    let fetchedRepos = [];
+    while (true) {
+      try {
+        const result = await axios.get(
+          'https://api.github.com/search/repositories', {
+            params: {
+              q: `user:${org}`,
+              sort: 'stars',
+              order: 'desc',
+              page: page,
+            },
           }
+        );
 
-          fetchedRepos = [...fetchedRepos, ...result.data.items];
-          page++;
-        } catch (error) {
-          console.error("Error fetching data", error);
+        if (result.data.items.length === 0) {
           break;
         }
-      }
-      
-      setRepos(fetchedRepos);
-      setLoading(false);
-    };
 
-    fetchData();
-  }, []);
+        fetchedRepos = [...fetchedRepos, ...result.data.items];
+        page++;
+      } catch (error) {
+        console.error("Error fetching data", error);
+        break;
+      }
+    }
+
+    setRepos(fetchedRepos);
+    setLoading(false);
+  };
 
   const fetchCommits = async (repoName) => {
     try {
       const result = await axios.get(
-        `https://api.github.com/repos/netflix/${repoName}/commits`
+        `https://api.github.com/repos/${org}/${repoName}/commits`
       );
 
       setCommits(result.data);
@@ -61,15 +57,23 @@ export default function Home() {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleOrgChange = (e) => {
+    setOrg(e.target.value);
+  };
+
+  const handleOrgSubmit = (e) => {
+    e.preventDefault();
+    fetchRepos(org);
+  };
+
+  useEffect(() => {
+    fetchRepos(org);
+  }, []);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
     console.log("setIsOpen")
   };
-
   return (
     <div className='flex flex-col items-center pt-10 bg-slate-900 text-sky-100'>
       <h1 className='text-4xl'>Welcome to my GoLinks FrontEnd Project</h1>
@@ -89,9 +93,13 @@ export default function Home() {
                   setSelectedRepo(repo.name);
                   fetchCommits(repo.name);
                   toggleDropdown();
-                }} className='border-0 rounded-xl bg-sky-300 text-slate-900 p-3'>
+                }} className='border-0 rounded-xl bg-sky-300 text-slate-900 p-3 hover:bg-sky-700'>
                   Show Commits
                 </button>
+                <form onSubmit={handleOrgSubmit} className='mt-5'>
+                  <input type="text" value={org} onChange={handleOrgChange} className="border p-2 mr-2 rounded-xl text-slate-900" />
+                  <button type="submit" className="px-4 py-2 bg-sky-500 text- rounded hover:bg-sky-700 ">Fetch Repos</button>
+                </form>
                 
               </li>
             </div>
