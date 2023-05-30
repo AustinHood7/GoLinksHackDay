@@ -76,7 +76,7 @@ export default function Home() {
       <h2 className='text-3xl text-sky-300 mt-5'>Author: Austin Hood</h2>
       <ul className=''>
         {repos.map((repo) => (
-          <div className='border rounded-xl my-10 max-w-[50%] mx-auto px-10 flex'>
+          <div className='border rounded-xl my-10 md:max-w-[50%] md:mx-auto px-10 md:flex mx-5'>
             <div className=''>
               <li key={repo.id} className='my-5'>
                 <h2 className='text-2xl pb-5'>{repo.name}</h2>
@@ -97,7 +97,7 @@ export default function Home() {
             </div>
             
             {isOpen && (
-        <div className="my-5 rounded-md shadow-lg bg-sky-300 text-slate-900 px-5 overflow-y-scroll max-h-[30rem] ml-[250px]">
+        <div className="my-5 rounded-md shadow-lg bg-sky-300 text-slate-900 px-5 overflow-y-scroll max-h-[30rem] md:ml-[250px]">
           <h1 className="text-3xl font-bold my-4">Commits for {selectedRepo}</h1>
           <ul>
             {commits.map((commit) => (
